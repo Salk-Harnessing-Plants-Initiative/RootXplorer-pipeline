@@ -13,16 +13,17 @@ We'd like to extract a few traits that related to root penetration.
 1. **Clone the repository**:  
    Clone the repository to the local drive.
    ```
-   git clone https://github.com/linwang9926/SALK_projects.git
+   git clone https://github.com/Salk-Harnessing-Plants-Initiative/cylinder-arab-penetration.git
    ```
 2. **Navigate to the cloned directory**:  
    
    ```
    cd SALK_projects/cylinder_arab_penetration
    ```
-3. **Create a new conda environment**:
+3. **Create new conda environments**:
    ```
-   conda env create -f environment.yml
+   conda env create -f environment_segmentation.yml
+   conda env create -f environment_analysis.yml
    ```
 4. **Activate conda environment**
     ```

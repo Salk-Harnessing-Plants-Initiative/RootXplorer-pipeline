@@ -1,0 +1,42 @@
+# To install: conda env create -f environment.yml
+#
+# To check that it's working: python -c "import torch; print(torch.cuda.is_available())"
+#
+# Ref: https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md
+name: segmentation-pipeline
+
+channels:
+  - nvidia
+  - conda-forge
+  - defaults
+  - pytorch
+  - fvcore
+  - iopath
+  - pytorch3d
+
+dependencies:
+  - python=3.8
+  - ipykernel
+  # Install cuda libs + ptxas compiler from nvidia channel
+  # This will accelerate the compilation of kernels for your specific card
+  - cudatoolkit=11.3
+  - cudnn=8.2
+  - cupti=11.3
+  - cuda-nvcc
+  - pytorch::pytorch=1.11.0
+  - pytorch::torchvision
+  - pytorch::torchaudio
+  - pytorch3d::pytorch3d=0.7.0
+  - ffmpeg
+  - nodejs
+  - pip
+  - pip:
+    - matplotlib
+    - pandas
+    - seaborn
+    - ipywidgets
+    - rich
+    - scikit-learn
+    - albumentations
+    - opencv-python-headless
+    - segmentation_models_pytorch

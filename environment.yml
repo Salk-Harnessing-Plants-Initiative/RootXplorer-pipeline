@@ -1,0 +1,17 @@
+name: cylinder-penetration-arab-analysis
+
+channels:
+  - conda-forge
+  - defaults
+  
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - matplotlib
+    - pandas
+    - seaborn
+    - scikit-learn
+    - jupyter
+    - opencv-python
+    - shapely

@@ -201,10 +201,11 @@ def get_preprocessing(preprocessing_fn=None):
 
 # crop images
 def crop_img(image_path, crop_folder, save_path):
+    # save the layer index of image in a dataframe/csv
     title = ["wave", "scanner", "plant", "frame", "layer_ind"]
     data = np.zeros([1, 5])
     dataframe = pd.DataFrame(data, columns=title)
-    layer_boundary_threshold = 20
+    # layer_boundary_threshold = 20
     window_size = 5  # sliding windows for the moving average
 
     wave_list = [
@@ -218,7 +219,7 @@ def crop_img(image_path, crop_folder, save_path):
         ]
 
         for scanner in scanner_list:
-
+            # crop image start X and Y locations
             startY = (
                 180 if scanner.endswith("SlowScanner") else 219
             )  # based on the 1030 Y for slowscanner, 1069Y for FastScannner
@@ -278,6 +279,7 @@ def crop_img(image_path, crop_folder, save_path):
 
 # main
 def main():
+    # indicate the input of the main function
     parser = argparse.ArgumentParser(description="Segmentation Model Training Pipeline")
     parser.add_argument("--image_path", required=True, help="Training images path")
     parser.add_argument("--save_path", required=True, help="Segmentation path")
@@ -299,7 +301,7 @@ def main():
     else:
         raise ValueError("Model not available!")
 
-    # segment crop images
+    # crop images and layer index in a csv file
     crop_folder = os.path.join(save_path, "crop")
     crop_img(image_path, crop_folder, save_path)
 
@@ -371,7 +373,7 @@ def main():
 
     print(len(test_dataset))
     # predict patch segmentation
-    for idx in range(1):  # len(test_dataset)
+    for idx in range(len(test_dataset)):  # len(test_dataset)
         image, names = test_dataset[idx]
         subfolder = names.rsplit("/", 1)[0][5:]  # get the subfolders without 'crop/'
         # subfolder = names.rsplit('/',1)[0]

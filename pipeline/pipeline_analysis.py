@@ -170,7 +170,6 @@ def get_statistics(save_path):
     # add ratio of root area and root count
     data["root_area_ratio"] = data["bottom_root_area"] / data["upper_root_area"]
     data["root_count_ratio"] = data["bottom_root_count"] / data["upper_root_count"]
-    # data.columns
 
     data = data[~data.isin([np.nan, np.inf, -np.inf]).any(axis=1)]
     # data.to_csv(os.path.join(save_path,'arab_cylinder_results_removeoutlier.csv'),index=False)

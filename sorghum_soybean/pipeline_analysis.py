@@ -48,11 +48,23 @@ def get_layer_boundary_fodler(image_folder, save_path):
     ind_df = pd.DataFrame()
     for img in images:
         image_name = os.path.join(image_folder, img)
+        plant = os.path.dirname(image_name)
+        frame = os.path.splitext(os.path.basename(image_name))[0]
         image = cv2.imread(image_name)
 
         ind = get_layer_boundary(image)
         ind_df = pd.concat(
-            [ind_df, pd.DataFrame({"img_name": [img], "layer_ind": [ind]})],
+            [
+                ind_df,
+                pd.DataFrame(
+                    {
+                        "image_name": [img],
+                        "plant": [plant],
+                        "frame": [frame],
+                        "layer_ind": [ind],
+                    }
+                ),
+            ],
             ignore_index=True,
         )
     csv_name = os.path.join(save_path, "layer_index.csv")
@@ -111,22 +123,23 @@ def get_count(seg_image, index_median, threshold_area, threshold_count):
     return upper_root_count, bottom_root_count
 
 
-def get_statistics_frames(save_path):
+def get_statistics_frames(df_filtered, save_path):
     # import csv data
-    data_path = os.path.join(save_path, "traits_72frames.csv")
-    data = pd.read_csv(data_path)
+    # data_path = os.path.join(save_path, "traits_72frames.csv")
+    # data = pd.read_csv(data_path)
+    data = df_filtered
 
     # add ratio of root area and root count
     data["root_area_ratio"] = data["bottom_area"] / data["upper_area"]
     data["root_count_ratio"] = data["bottom_root_count"] / data["upper_root_count"]
 
     data = data[~data.isin([np.nan, np.inf, -np.inf]).any(axis=1)]
-    data["scanner_plant"] = data["scanner"] + "_" + data["plant"]
+    # data["scanner_plant"] = data["scanner"] + "_" + data["plant"]
 
     # filter out outliers > 2
     z_score_threshold = 2
     filtered_df = pd.DataFrame()
-    data_plant = data.groupby("scanner_plant")
+    data_plant = data.groupby("plant")
     for name, group in data_plant:
         # Calculate the z-scores for 'root_count_ratio' and 'root_area_ratio' columns within each wave
         z_scores_count = np.abs(stats.zscore(group["root_count_ratio"]))
@@ -147,7 +160,7 @@ def get_statistics_frames(save_path):
         os.path.join(save_path, "traits_filteredframes.csv"), index=False
     )
     filtered_df_summary = (
-        filtered_df.groupby("scanner_plant")[["root_area_ratio", "root_count_ratio"]]
+        filtered_df.groupby("plant")[["root_area_ratio", "root_count_ratio"]]
         .mean()
         .reset_index()
     )
@@ -231,9 +244,9 @@ def viz_data(save_path):
 def get_traits(seg_folder, ind_df, save_path):
     traits_df = ind_df
     for i in range(len(ind_df)):  #
-        print(f"{i}/{len(ind_df)}")
+        # print(f"Getting traits of {i+1}th image among {len(ind_df)} images")
         # get layer index and image path
-        image_path = os.path.join(seg_folder, ind_df["img_name"][i])
+        image_path = os.path.join(seg_folder, ind_df["image_name"][i])
         seg_image = cv2.imread(image_path)
         index_frame = int(ind_df["layer_ind"][i])
 
@@ -252,6 +265,49 @@ def get_traits(seg_folder, ind_df, save_path):
     save_name = os.path.join(save_path, "traits.csv")
     traits_df.to_csv(save_name, index=False)
     return traits_df
+
+
+def remove_frame_outlier_0_upper(data, write_csv, output_dir):
+    """Remove frames with 0 upper_root_count."""
+    filter = data["upper_root_count"] == 0
+    removed = data[filter]
+    print(f"Removed {len(removed)} frames with 0 root count in upper layer")
+    new_data = data[~filter]
+    if write_csv:
+        csv_path = os.path.join(output_dir, "removed_0upper.csv")
+        removed.to_csv(csv_path, index=False)
+    return new_data
+
+
+def remove_frame_outlier_0_bottom(data, threshold, output_dir):
+    """Remove outliers for less than 50% with 0 bottom_root_count."""
+    # Group by 'plant' and calculate the percentage of frames with value 0
+    frame_count_with_zeros = (
+        data[data["bottom_root_count"] == 0].groupby("plant")["frame"].count()
+    )
+    total_frame_count = data.groupby("plant")["frame"].count()
+    percentage_zeros = frame_count_with_zeros.div(total_frame_count, fill_value=0)
+
+    # Get the plants where less than a threshold of frames have value 0
+    plants_to_remove = percentage_zeros[percentage_zeros < threshold].index
+
+    # Remove rows for the identified plants
+    df_filtered = data[
+        ~((data["plant"].isin(plants_to_remove)) & (data["bottom_root_count"] == 0))
+    ]
+    df_removed = data[
+        ~(~((data["plant"].isin(plants_to_remove)) & (data["bottom_root_count"] == 0)))
+    ]
+    print(f"Removed {len(df_removed)} frames with less than 0.5 has 0 bottom counts")
+
+    # save the filtered data
+    filtered_path = os.path.join(output_dir, "filtered_72frames_0upper_0bottom.csv")
+    df_filtered.to_csv(filtered_path, index=False)
+
+    # save the removed data
+    removed_path = os.path.join(output_dir, "removed_0bottom.csv")
+    df_removed.to_csv(removed_path, index=False)
+    return df_filtered, df_removed
 
 
 def main():
@@ -275,7 +331,7 @@ def main():
 
     # get the layer index of each cropped image
     print("Getting layer boundary index")
-    # ind_df = get_layer_boundary_fodler(image_folder, save_path)
+    ind_df = get_layer_boundary_fodler(image_folder, save_path)
     ind_df = pd.read_csv(os.path.join(save_path, "layer_index.csv"))
     print(f"ind_df columns: {ind_df.columns}")
 
@@ -287,8 +343,26 @@ def main():
     # get traits
     print("Getting traits")
     traits_df = get_traits(seg_folder, ind_df, save_path)
+    # traits_df = pd.read_csv(os.path.join(save_path, "traits.csv"))
 
-    # filtered_df_frames, filtered_df_summary_frames = get_statistics_frames(save_path)
+    # delete frames with 0 in upper layer
+    write_csv = True  # save the filtered data
+    remove_0 = remove_frame_outlier_0_upper(traits_df, write_csv, save_path)
+
+    # remove outliers for less than a threshold with 0 bottom_root_count.
+    # the default threshold is 50% (0.5)
+    # CHANGE the threshold if needed
+    threshold = 0.5
+    df_filtered, df_removed = remove_frame_outlier_0_bottom(
+        remove_0, threshold, save_path
+    )
+    # df_filtered = pd.read_csv(
+    #     os.path.join(save_path, "filtered_72frames_0upper_0bottom.csv")
+    # )
+
+    filtered_df_frames, filtered_df_summary_frames = get_statistics_frames(
+        df_filtered, save_path
+    )
 
     # filtered_df_plant = get_statistics_plants(save_path)
     # viz_data(save_path)
@@ -296,10 +370,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# image_folder = "../Phytagel_concentrations"
-# seg_folder = "../segment_crop_v01"
-# boundary_idx_72frames = get_layer_boundary_folder(image_folder, seg_folder)
-# boundary_idx_72frames.to_csv(
-#     "../segment_crop_v01_analysis/boundary_idx_72frames.csv", index=False
-# )

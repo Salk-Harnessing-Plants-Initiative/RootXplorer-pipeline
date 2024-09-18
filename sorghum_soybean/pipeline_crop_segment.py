@@ -35,7 +35,7 @@ def crop_images_folder(bbox, image_folder, save_path):
     for image_name in images:
         image_path = os.path.join(image_folder, image_name)
         image = cv2.imread(image_path)
-        print(f"image_path: {image_path}")
+        print(f"cropping image: {image_path}")
         if "Fast" in image_path:
             bbox2 = bbox["Fast"]
             startX, startY, width, height = bbox2
@@ -282,7 +282,7 @@ def main():
     bbox = {"Fast": (350, 56, 1024, 1024), "Slow": (520, 56, 1024, 1024)}
     image_path_crop = os.path.join(save_path, "crop")
     # create_clear_folder(image_path_crop)
-    # crop_images_folder(bbox, image_path, image_path_crop)
+    crop_images_folder(bbox, image_path, image_path_crop)
 
     # generate metedata file
     metadata_file = generate_metafile(image_path_crop, image_path_crop)

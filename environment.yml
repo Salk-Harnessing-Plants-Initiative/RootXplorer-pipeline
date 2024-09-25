@@ -1,9 +1,4 @@
-# To install: conda env create -f environment.yml
-#
-# To check that it's working: python -c "import torch; print(torch.cuda.is_available())"
-#
-# Ref: https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md
-name: segmentation-pipeline
+name: segmentation-analysis
 
 channels:
   - nvidia
@@ -17,8 +12,6 @@ channels:
 dependencies:
   - python=3.8
   - ipykernel
-  # Install cuda libs + ptxas compiler from nvidia channel
-  # This will accelerate the compilation of kernels for your specific card
   - cudatoolkit=11.3
   - cudnn=8.2
   - cupti=11.3
@@ -39,4 +32,7 @@ dependencies:
     - scikit-learn
     - albumentations
     - opencv-python-headless
+    - opencv-python
     - segmentation_models_pytorch
+    - jupyter
+    - shapely

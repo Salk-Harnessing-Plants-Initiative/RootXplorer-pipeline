@@ -39,8 +39,11 @@ def crop_images_folder(bbox, image_folder, save_path):
         if "Fast" in image_path:
             bbox2 = bbox["Fast"]
             startX, startY, width, height = bbox2
-        else:
+        elif "Slow" in image_path:
             bbox2 = bbox["Slow"]
+            startX, startY, width, height = bbox2
+        else:
+            bbox2 = bbox["Main"]
             startX, startY, width, height = bbox2
         # startX, startY, width, height = bbox
         new_image = image[startY : startY + height, startX : startX + width, :]
@@ -279,7 +282,11 @@ def main():
 
     # crop images
     # bbox = (617, 190, 970, 850)  # (590, 56, 1024, 1024) crop images
-    bbox = {"Fast": (350, 56, 1024, 1024), "Slow": (520, 56, 1024, 1024)}
+    bbox = {
+        "Fast": (350, 56, 1024, 1024),
+        "Slow": (520, 56, 1024, 1024),
+        "Main": (590, 56, 1024, 1024),
+    }
     image_path_crop = os.path.join(save_path, "crop")
     # create_clear_folder(image_path_crop)
     crop_images_folder(bbox, image_path, image_path_crop)

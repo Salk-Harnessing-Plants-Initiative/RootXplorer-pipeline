@@ -167,16 +167,47 @@ def get_statistics_frames(df_filtered, save_path):
     # filtered_df.to_csv(
     #     os.path.join(save_path, "traits_filteredframes.csv"), index=False
     # )
-
+    # filtered_df_summary_count = (
+    #     filtered_df_count.groupby("plant")[
+    #         ["root_count_ratio", "upper_root_count", "bottom_root_count"]
+    #     ]
+    #     .mean()
+    #     .reset_index()
+    # )
     filtered_df_summary_count = (
-        filtered_df_count.groupby("plant")[["root_count_ratio"]].mean().reset_index()
+        filtered_df_area.groupby("plant")[
+            ["root_count_ratio", "upper_root_count", "bottom_root_count"]
+        ]
+        .agg(
+            root_count_ratio=("root_count_ratio", "mean"),
+            upper_root_count=("upper_root_count", "mean"),
+            bottom_root_count=("bottom_root_count", "mean"),
+            frame_number_count=("root_count_ratio", "size"),  # Count of each group
+        )
+        .reset_index()
     )
     filtered_df_summary_count = filtered_df_summary_count.rename(
         columns={"plant": "plant_path"}
     )
 
+    # filtered_df_summary_area = (
+    #     filtered_df_area.groupby("plant")[
+    #         ["root_area_ratio", "upper_area", "bottom_area"]
+    #     ]
+    #     .mean()
+    #     .reset_index()
+    # )
     filtered_df_summary_area = (
-        filtered_df_area.groupby("plant")[["root_area_ratio"]].mean().reset_index()
+        filtered_df_area.groupby("plant")[
+            ["root_area_ratio", "upper_area", "bottom_area"]
+        ]
+        .agg(
+            root_area_ratio=("root_area_ratio", "mean"),
+            upper_area=("upper_area", "mean"),
+            bottom_area=("bottom_area", "mean"),
+            frame_number_area=("root_area_ratio", "size"),  # Count of each group
+        )
+        .reset_index()
     )
     filtered_df_summary_area = filtered_df_summary_area.rename(
         columns={"plant": "plant_path"}
@@ -248,20 +279,52 @@ def get_statistics_plants(save_path, master_data, plant_group):
     #     .mean()
     #     .reset_index()
     # )
+    # filtered_df_summary_count = (
+    #     filtered_df_count.dropna(subset=["root_count_ratio"])  # Exclude NaN rows
+    #     .groupby(plant_group)[
+    #         ["root_count_ratio", "upper_root_count", "bottom_root_count"]
+    #     ]
+    #     .mean()
+    #     .reset_index()
+    # )
     filtered_df_summary_count = (
-        filtered_df_count.dropna(subset=["root_count_ratio"])  # Exclude NaN rows
-        .groupby(plant_group)[["root_count_ratio"]]
-        .mean()
+        filtered_df_area.dropna(subset=["root_count_ratio"])
+        .groupby(plant_group)[
+            ["root_count_ratio", "upper_root_count", "bottom_root_count"]
+        ]
+        .agg(
+            root_count_ratio_mean=("root_count_ratio", "mean"),
+            upper_root_count_mean=("upper_root_count", "mean"),
+            bottom_root_count_mean=("bottom_root_count", "mean"),
+            plant_number_count=("root_count_ratio", "size"),  # Count of each group
+        )
         .reset_index()
     )
-    print(f"filtered_df_summary_count: {filtered_df_summary_count}")
+    # print(f"filtered_df_summary_count: {filtered_df_summary_count}")
     # filtered_df_summary_count = filtered_df_summary_count.rename(
     #     columns={"plant": "plant_path"}
     # )
 
+    # filtered_df_summary_area = (
+    #     filtered_df_area.groupby(plant_group)[
+    #         ["root_area_ratio", "upper_area", "bottom_area"]
+    #     ]
+    #     .mean()
+    #     .reset_index()
+    # )
     filtered_df_summary_area = (
-        filtered_df_area.groupby(plant_group)[["root_area_ratio"]].mean().reset_index()
+        filtered_df_area.groupby(plant_group)[
+            ["root_area_ratio", "upper_area", "bottom_area"]
+        ]
+        .agg(
+            root_area_ratio_mean=("root_area_ratio", "mean"),
+            upper_area_mean=("upper_area", "mean"),
+            bottom_area_mean=("bottom_area", "mean"),
+            plant_number_area=("root_area_ratio", "size"),  # Count of each group
+        )
+        .reset_index()
     )
+    # print(f"filtered_df_summary_area: {filtered_df_summary_area}")
     # filtered_df_summary_area = filtered_df_summary_area.rename(
     #     columns={"plant": "plant_path"}
     # )
@@ -425,8 +488,8 @@ def main():
 
     # get the layer index of each cropped image
     print("Getting layer boundary index")
-    # ind_df = get_layer_boundary_fodler(image_folder, save_path)
-    ind_df = pd.read_csv(os.path.join(save_path, "layer_index.csv"))
+    ind_df = get_layer_boundary_fodler(image_folder, save_path)
+    # ind_df = pd.read_csv(os.path.join(save_path, "layer_index.csv"))
     print(f"ind_df columns: {ind_df.columns}")
 
     # boundary_idx_72frames = get_layer_boundary_folder(image_folder, seg_folder)
@@ -436,8 +499,8 @@ def main():
 
     # get traits
     print("Getting traits")
-    # traits_df = get_traits(seg_folder, ind_df, save_path)
-    traits_df = pd.read_csv(os.path.join(save_path, "traits.csv"))
+    traits_df = get_traits(seg_folder, ind_df, save_path)
+    # traits_df = pd.read_csv(os.path.join(save_path, "traits.csv"))
 
     # delete frames with 0 in upper layer
     write_csv = True  # save the filtered data

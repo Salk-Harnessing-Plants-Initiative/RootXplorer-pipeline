@@ -3,8 +3,7 @@
 ## Purpose and background
 **Purpose**: segmenting cylinder images and extracting traits from segmentation results for Arabidopsis, rice, soybean, and sorghum.
 
-**Background**: to be updated with manuscript. change another picture with root area ratio and root count ratio illustration.
-
+**Background**: to be updated with manuscript. 
 
 ## Installation
 

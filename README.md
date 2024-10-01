@@ -32,13 +32,15 @@
    ```
    python pipeline_crop_segment.py --image_path ../Images_test_v03 --save_path ../Segmentation_v03_test  --model_name best_model_crop_cylinder_unetpp_resnet101_1024patch_1batch_40epoch_02_27
    ```
+   Models can be downloaded from [Box](https://salkinstitute.box.com/s/cqgv1dwm1hkf84eid72hdjqg47nwbpo5).
+   
    Change the `image_path` (../Images_test_v03) to your folder name where you save the cylinder images;
    
    (optional) Change the `save_path` (../Images_test_v03) to a folder name where you'd like to save the cropped images and segmentation. The new folder will be created automatically, you don't have to create a new one by yourself.
    
    Change the `model_name` (best_model_crop_cylinder_unetpp_resnet101_1024patch_1batch_40epoch_02_27) if needed. Arabidopsis model is `best_model_unet_plusplus_resnet101_cylinder_0124`; rice model is `best_model_rice_seminal_cylinder_unetpp_resnet101_1024patch_4batch_100epoch_05_23`; soybean and sorghum model is `best_model_crop_cylinder_unetpp_resnet101_1024patch_1batch_40epoch_02_27`.
 
-2. **get traits and remove outlier**:
+3. **get traits and remove outlier**:
    ```
    python pipeline_analysis.py --image_folder ../Segmentation_v03_test/crop --seg_folder ../Segmentation_v03_test/Segmentation --save_path ../Segmentation_v03_test/analysis --master_data_csv ../MasterData_May2024.csv --plant_group accession
    ```

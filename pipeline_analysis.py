@@ -153,27 +153,13 @@ def get_statistics_frames(df_filtered, save_path):
 
         # Combine the outlier masks for both columns using the logical AND operation
         # RCR RAR independently LW
-        combined_outlier_mask = outlier_mask_count & outlier_mask_area
-
-        # Append the non-outlier rows to the filtered DataFrame
-        # filtered_df = pd.concat([filtered_df, group[combined_outlier_mask]])
+        # combined_outlier_mask = outlier_mask_count & outlier_mask_area
 
         # filter non-outlier rows of root count ratio
         filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
         # filter non-outlier rows of root area ratio
         filtered_df_area = pd.concat([filtered_df_area, group[outlier_mask_area]])
 
-    # filtered_df["trt"] = filtered_df["plant"].str[:2]
-    # filtered_df.to_csv(
-    #     os.path.join(save_path, "traits_filteredframes.csv"), index=False
-    # )
-    # filtered_df_summary_count = (
-    #     filtered_df_count.groupby("plant")[
-    #         ["root_count_ratio", "upper_root_count", "bottom_root_count"]
-    #     ]
-    #     .mean()
-    #     .reset_index()
-    # )
     filtered_df_summary_count = (
         filtered_df_area.groupby("plant")[
             ["root_count_ratio", "upper_root_count", "bottom_root_count"]
@@ -190,13 +176,6 @@ def get_statistics_frames(df_filtered, save_path):
         columns={"plant": "plant_path"}
     )
 
-    # filtered_df_summary_area = (
-    #     filtered_df_area.groupby("plant")[
-    #         ["root_area_ratio", "upper_area", "bottom_area"]
-    #     ]
-    #     .mean()
-    #     .reset_index()
-    # )
     filtered_df_summary_area = (
         filtered_df_area.groupby("plant")[
             ["root_area_ratio", "upper_area", "bottom_area"]
@@ -234,8 +213,6 @@ def get_statistics_plants(save_path, master_data, plant_group):
 
     # get plant name based on plant_path
     data["plant_name"] = data["plant_path"].apply(lambda x: x.split("/")[-1])
-    # data[["sacnner", "plant"]] = data["scanner_plant"].str.split("_", expand=True)
-    # data["crop_trt"] = data["crop"] + "_" + data["trt"]
 
     # link the master data to get concentration or genotype/accession experimental design
     data = data.merge(
@@ -259,34 +236,12 @@ def get_statistics_plants(save_path, master_data, plant_group):
         # Create boolean masks to filter out the outliers for each column
         outlier_mask_count = z_scores_count <= z_score_threshold
         outlier_mask_area = z_scores_area <= z_score_threshold
-        # print(
-        #     f"name: {name}, z_scores_count: {z_scores_count}, outlier_mask_count: {outlier_mask_count}"
-        # )
-        # print(f"group: {group}")
-
-        # Combine the outlier masks for both columns using the logical AND operation
-        # combined_outlier_mask = outlier_mask_count & outlier_mask_area
 
         # filter non-outlier rows of root count ratio
         filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
         # filter non-outlier rows of root area ratio
         filtered_df_area = pd.concat([filtered_df_area, group[outlier_mask_area]])
 
-        # Append the non-outlier rows to the filtered DataFrame
-        # filtered_df = pd.concat([filtered_df, group[combined_outlier_mask]])
-    # filtered_df_summary_count = (
-    #     filtered_df_count.groupby(plant_group)[["root_count_ratio"]]
-    #     .mean()
-    #     .reset_index()
-    # )
-    # filtered_df_summary_count = (
-    #     filtered_df_count.dropna(subset=["root_count_ratio"])  # Exclude NaN rows
-    #     .groupby(plant_group)[
-    #         ["root_count_ratio", "upper_root_count", "bottom_root_count"]
-    #     ]
-    #     .mean()
-    #     .reset_index()
-    # )
     filtered_df_summary_count = (
         filtered_df_area.dropna(subset=["root_count_ratio"])
         .groupby(plant_group)[
@@ -300,18 +255,7 @@ def get_statistics_plants(save_path, master_data, plant_group):
         )
         .reset_index()
     )
-    # print(f"filtered_df_summary_count: {filtered_df_summary_count}")
-    # filtered_df_summary_count = filtered_df_summary_count.rename(
-    #     columns={"plant": "plant_path"}
-    # )
 
-    # filtered_df_summary_area = (
-    #     filtered_df_area.groupby(plant_group)[
-    #         ["root_area_ratio", "upper_area", "bottom_area"]
-    #     ]
-    #     .mean()
-    #     .reset_index()
-    # )
     filtered_df_summary_area = (
         filtered_df_area.groupby(plant_group)[
             ["root_area_ratio", "upper_area", "bottom_area"]
@@ -324,10 +268,60 @@ def get_statistics_plants(save_path, master_data, plant_group):
         )
         .reset_index()
     )
-    # print(f"filtered_df_summary_area: {filtered_df_summary_area}")
-    # filtered_df_summary_area = filtered_df_summary_area.rename(
-    #     columns={"plant": "plant_path"}
-    # )
+
+    # save the filtered data: combine the area and count
+    filtered_df = pd.merge(
+        filtered_df_count[
+            [
+                "plant_path",
+                "plant_name",
+                "accession",
+                "root_count_ratio",
+                "upper_root_count",
+                "bottom_root_count",
+                "frame_number_count",
+            ]
+        ],
+        filtered_df_area[
+            [
+                "plant_path",
+                "plant_name",
+                "accession",
+                "root_area_ratio",
+                "upper_area",
+                "bottom_area",
+                "frame_number_area",
+            ]
+        ],
+        on="plant_name",
+        how="outer",
+    )
+
+    # Fill missing values in plant_path and accession from filtered_df_area
+    filtered_df["plant_path"] = filtered_df["plant_path_x"].fillna(
+        filtered_df["plant_path_y"]
+    )
+    filtered_df["accession"] = filtered_df["accession_x"].fillna(
+        filtered_df["accession_y"]
+    )
+
+    # Drop unnecessary duplicate columns created during merge
+    filtered_df.drop(
+        columns=["plant_path_x", "plant_path_y", "accession_x", "accession_y"],
+        inplace=True,
+    )
+    # change column order
+    column_order = ["accession", "plant_name", "plant_path"] + [
+        col
+        for col in filtered_df.columns
+        if col not in ["accession", "plant_name", "plant_path"]
+    ]
+    filtered_df = filtered_df[column_order]
+    # row ordered by accession
+    filtered_df = filtered_df.sort_values(by="accession", ascending=True)
+    filtered_df.to_csv(
+        os.path.join(save_path, "traits_filteredplants.csv"), index=False
+    )
 
     # combine the area and count
     filtered_df_summary = pd.merge(
@@ -339,17 +333,6 @@ def get_statistics_plants(save_path, master_data, plant_group):
     filtered_df_summary.to_csv(
         os.path.join(save_path, "traits_filteredplants_summary.csv"), index=False
     )
-
-    # statistics = (
-    #     filtered_df_summary.groupby(plant_group)[
-    #         ["root_count_ratio", "root_area_ratio"]
-    #     ]
-    #     .agg(["mean", "median", "std", "min", "max"])
-    #     .reset_index()
-    # )
-    # statistics.to_csv(
-    #     os.path.join(save_path, "traits_filteredplants_summary.csv"), index=False
-    # )
 
     return filtered_df_summary_count, filtered_df_summary_area, filtered_df_summary
 

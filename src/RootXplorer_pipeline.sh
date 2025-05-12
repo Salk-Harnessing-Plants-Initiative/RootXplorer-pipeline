@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Starting RootXplorer pipeline..."
+
 # Start total timer
 TOTAL_START=$(date +%s)
 
@@ -35,3 +37,4 @@ TOTAL_TIME=$(( $(date +%s) - TOTAL_START ))
 TOTAL_MINUTES=$((TOTAL_TIME / 60))
 
 echo "Total execution time: ${TOTAL_MINUTES}m"
+echo "Finished script"

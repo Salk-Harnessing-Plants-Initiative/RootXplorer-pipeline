@@ -485,11 +485,11 @@ def main():
 
     experiment = args.experiment
 
-    image_folder = os.path.join("../Segmentation", experiment, "crop")
-    seg_folder = os.path.join("../Segmentation", experiment, "Segmentation")
-    save_path = os.path.join("../Segmentation", experiment, "analysis")
+    image_folder = os.path.join("./Segmentation", experiment, "crop")
+    seg_folder = os.path.join("./Segmentation", experiment, "Segmentation")
+    save_path = os.path.join("./Segmentation", experiment, "analysis")
 
-    image_path = os.path.join("../images", experiment)
+    image_path = os.path.join("./images", experiment)
     master_data_csv = [file for file in os.listdir(image_path) if file.endswith(".csv")]
     # print(f"master_data_csv: {master_data_csv[0]}")
     master_data = pd.read_csv(os.path.join(image_path, master_data_csv[0]))

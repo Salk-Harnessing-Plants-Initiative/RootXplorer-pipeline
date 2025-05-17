@@ -1,0 +1,27 @@
+# Core Python version (can be specified separately if needed)
+# python==3.8
+
+# PyTorch and friends
+# torch==1.11.0
+# torchvision
+# torchaudio
+# pytorch3d==0.7.0
+
+# General packages
+matplotlib
+pandas
+seaborn
+ipywidgets
+rich
+scikit-learn
+albumentations
+opencv-python-headless
+# opencv-python
+segmentation-models-pytorch
+jupyter
+shapely
+# torch==1.11.0+cu113
+
+# Optional: If using CUDA 11.3, install torch like this:
+# pip install torch==1.11.0+cu113 torchvision==0.12.0+cu113 torchaudio==0.11.0 --extra-index-url https://download.pytorch.org/whl/cu113
+# pip install torch==1.11.0+cu113 --extra-index-url https://download.pytorch.org/whl/cu113

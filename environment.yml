@@ -17,9 +17,9 @@ dependencies:
   - cupti=11.3
   - cuda-nvcc
   - pytorch::pytorch=1.11.0
-  - pytorch::torchvision
-  - pytorch::torchaudio
-  - pytorch3d::pytorch3d=0.7.0
+  # - pytorch::torchvision
+  # - pytorch::torchaudio
+  # - pytorch3d::pytorch3d=0.7.0
   - ffmpeg
   - nodejs
   - pip
@@ -32,7 +32,7 @@ dependencies:
     - scikit-learn
     - albumentations
     - opencv-python-headless
-    - opencv-python
+    # - opencv-python
     - segmentation_models_pytorch
     - jupyter
     - shapely

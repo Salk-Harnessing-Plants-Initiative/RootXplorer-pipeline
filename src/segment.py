@@ -265,7 +265,7 @@ def generate_metafile(image_path_crop, label_path_crop):
         label_path_i = os.path.join(label_path_crop, subimage_list[i])
         metadata_row.append([str(i + 1), image_path_i, label_path_i])
 
-    metadata_file = "./metadata_tem.csv"
+    metadata_file = "./model/metadata_tem.csv"
 
     header = ["image_id", "image_path", "label_colored_path"]
     with open(metadata_file, "w") as csvfile:
@@ -278,10 +278,10 @@ def generate_metafile(image_path_crop, label_path_crop):
 
 def get_model(species):
     model_dict = {
-        "Arabidopsis": "best_model_arab_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Rice": "best_model_rice_seminal_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Soybean": "best_model_soybean_sorghum_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Sorghum": "best_model_soybean_sorghum_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
+        "Arabidopsis": "./model/arabidopsis_model",
+        "Rice": "./model/rice_seminal_model",
+        "Soybean": "./model/soybean_sorghum_model",
+        "Sorghum": "./model/soybean_sorghum_model",
     }
     model = model_dict[species]
     return model
@@ -303,10 +303,11 @@ def main():
 
     # get the model based on species
     model_name = get_model(species)
+    print(f"model_name: {model_name}")
 
     # get paths and master data
-    image_path = os.path.join("../images", experiment)
-    save_path = os.path.join("../Segmentation", experiment)
+    image_path = os.path.join("./images", experiment)
+    save_path = os.path.join("./Segmentation", experiment)
 
     master_data_csv = [file for file in os.listdir(image_path) if file.endswith(".csv")]
     # print(f"master_data_csv: {master_data_csv[0]}")
@@ -345,7 +346,7 @@ def main():
     preprocessing_fn = smp.encoders.get_preprocessing_fn(ENCODER, ENCODER_WEIGHTS)
 
     # check the color
-    class_dict = pd.read_csv("./label_class_dict_lr.csv")
+    class_dict = pd.read_csv("./model/label_class_dict_lr.csv")
     class_names = class_dict["name"].tolist()
     class_rgb_values = class_dict[["r", "g", "b"]].values.tolist()
 

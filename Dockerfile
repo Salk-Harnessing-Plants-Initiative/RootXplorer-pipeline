@@ -8,6 +8,7 @@ WORKDIR /workspace
 COPY requirements.txt .
 COPY src /workspace/src
 COPY model /workspace/model
+COPY images /workspace/images
 
 # 4. Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt 

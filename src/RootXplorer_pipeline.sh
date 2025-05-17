@@ -20,8 +20,8 @@ for experiment_path in "$IMAGE_DIR"/*; do
         echo "Processing $experiment/$species..."
         SPECIES_START=$SECONDS
 
-        python "src/pipeline_crop_segment_v2.py" --experiment "$experiment/$species" --species "$species"
-        python "src/pipeline_analysis_v2.py" --experiment "$experiment/$species"
+        python "src/segment.py" --experiment "$experiment/$species" --species "$species"
+        python "src/analysis.py" --experiment "$experiment/$species"
 
         SPECIES_TIME=$((SECONDS - SPECIES_START))
         SPECIES_MINUTES=$((SPECIES_TIME / 60))

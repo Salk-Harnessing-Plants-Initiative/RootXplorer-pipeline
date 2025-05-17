@@ -278,10 +278,10 @@ def generate_metafile(image_path_crop, label_path_crop):
 
 def get_model(species):
     model_dict = {
-        "Arabidopsis": "./model/best_model_arab_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Rice": "./model/best_model_rice_seminal_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Soybean": "./model/best_model_soybean_sorghum_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
-        "Sorghum": "./model/best_model_soybean_sorghum_cylinder_unetpp_resnet101_1024patch_1batch_100epoch_02_18",
+        "Arabidopsis": "./model/arabidopsis_model",
+        "Rice": "./model/rice_seminal_model",
+        "Soybean": "./model/soybean_sorghum_model",
+        "Sorghum": "./model/soybean_sorghum_model",
     }
     model = model_dict[species]
     return model

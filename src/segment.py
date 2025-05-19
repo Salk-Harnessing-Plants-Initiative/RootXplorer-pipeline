@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Aug  9 15:46:18 2023
-
-@author: linwang
-"""
-
-# %% import library
 import os, cv2, math, csv
 import numpy as np
 import pandas as pd
@@ -24,7 +16,6 @@ import segmentation_models_pytorch as smp
 import segmentation_models_pytorch.utils
 
 
-# %% add pading and crop images to patch size
 def get_scanner(image_name, master_data):
     match = master_data[
         master_data["barcode"].apply(lambda x: image_name.startswith(x))
@@ -48,7 +39,6 @@ def crop_images_folder(bbox, master_data, image_folder, save_path):
         image = cv2.imread(image_path)
         # get scanner
         scanner = get_scanner(image_name, master_data)
-        # print(f"cropping image: {image_path}")
         if scanner == "Fast":
             bbox2 = bbox["Fast"]
             startX, startY, width, height = bbox2
@@ -60,17 +50,13 @@ def crop_images_folder(bbox, master_data, image_folder, save_path):
             startX, startY, width, height = bbox2
         else:
             startX, startY, width, height = [np.nan, np.nan, np.nan, np.nan]
-        # startX, startY, width, height = bbox
 
-        # double check the sorghum and soybean original images and don't run this line, is slow
         if np.isnan(height) or np.isnan(width):
             continue
-        # print(f"{image_name} {startX, startY, width, height}")
 
         new_image = image[startY : startY + height, startX : startX + width, :]
 
         # save new_image
-        # print(image_name.split("/")[:-1])
         save_folder = os.path.join(save_path, "/".join(image_name.split("/")[:-1]))
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
@@ -84,8 +70,6 @@ def crop_image(image, true_dimensions):
     )
 
 
-# %% viz
-# Perform colour coding on the reverse-one-hot outputs
 def colour_code_segmentation(image, label_values):
     """
     Given a 1-channel array of class keys, colour code the segmentation results.
@@ -102,7 +86,6 @@ def colour_code_segmentation(image, label_values):
     return x
 
 
-# Perform reverse one-hot-encoding on labels / preds
 def reverse_one_hot(image):
     """
     Transform a 2D array in one-hot format (depth is num_classes),
@@ -120,7 +103,6 @@ def reverse_one_hot(image):
     return x
 
 
-# %% prediction dataset
 class PredictionDataset(torch.utils.data.Dataset):
     """Stanford Background Dataset. Read images, apply augmentation and preprocessing transformations.
 
@@ -148,8 +130,6 @@ class PredictionDataset(torch.utils.data.Dataset):
         self.preprocessing = preprocessing
 
     def __getitem__(self, i):
-        # read images and masks
-        # print(self.image_paths[i])
         image = cv2.cvtColor(cv2.imread(self.image_paths[i]), cv2.COLOR_BGR2RGB)
         names = self.image_paths[i].rsplit("/", 1)[-1].split(".")[0]
         path_name = self.image_paths[i]
@@ -167,15 +147,11 @@ class PredictionDataset(torch.utils.data.Dataset):
         return image, names, path_name
 
     def __len__(self):
-        # return length of
         return len(self.image_paths)
 
 
 def get_training_augmentation():
     train_transform = [
-        # album.PadIfNeeded(min_height=550, min_width=660, always_apply=True, border_mode=0),
-        # LW height and width change from 832 to 1000 to 1984 to 2720
-        # album.RandomCrop(height=1024, width=1024, always_apply=True),
         album.OneOf(
             [
                 album.HorizontalFlip(p=1),
@@ -191,8 +167,6 @@ def get_training_augmentation():
 def get_validation_augmentation():
     # Add sufficient padding to ensure image is divisible by 32
     test_transform = [
-        # LW size should be square and can be devided by 32
-        # LW height and width change from 992 to 1120 to 2752
         album.PadIfNeeded(
             min_height=1024,
             min_width=1024,
@@ -207,8 +181,6 @@ def get_validation_augmentation():
 def get_test_augmentation():
     # Add sufficient padding to ensure image is divisible by 32
     test_transform = [
-        # LW change min_height of 1120 to 6016 to 2016, same as val
-        # LW change min_width of 992 to 4000 to 1120 for checking images instead of images_test
         album.PadIfNeeded(
             min_height=256, min_width=256, always_apply=True, border_mode=0
         ),
@@ -287,13 +259,11 @@ def get_model(species):
     return model
 
 
-# %% main
 def main():
     parser = argparse.ArgumentParser(description="Segmentation Model Training Pipeline")
     parser.add_argument(
         "--experiment", required=True, help="Experimental design folder path"
     )
-    # parser.add_argument("--save_path", required=True, help="Segmentation path")
     parser.add_argument("--species", required=True, help="Plant species")
 
     args = parser.parse_args()
@@ -323,14 +293,12 @@ def main():
         raise ValueError("Model not available!")
 
     # crop images
-    # bbox = (617, 190, 970, 850)  # (590, 56, 1024, 1024) crop images
     bbox = {
         "Fast": (350, 56, 1024, 1024),
         "Slow": (520, 56, 1024, 1024),
         "Main": (590, 56, 1024, 1024),
     }
     image_path_crop = os.path.join(save_path, "crop")
-    # create_clear_folder(image_path_crop)
     crop_images_folder(bbox, master_data, image_path, image_path_crop)
 
     # generate metedata file
@@ -367,10 +335,8 @@ def main():
         class_rgb_values=select_class_rgb_values,
     )
 
-    # print(f"{len(test_dataset)} images in metadata.")
-
     # predict patch segmentation
-    for idx in range(len(test_dataset)):  # len(test_dataset)
+    for idx in range(len(test_dataset)):
         image, names, path_name = test_dataset[idx]
         image_vis = test_dataset_vis[idx][0].astype("uint8")
         true_dimensions = image_vis.shape
@@ -381,7 +347,6 @@ def main():
         # Convert pred_mask from `CHW` format to `HWC` format
         pred_mask = np.transpose(pred_mask, (1, 2, 0))
         # Get prediction channel corresponding to foreground
-        # pred_foreground_heatmap = crop_image(pred_mask[:,:,select_classes.index('root')], true_dimensions)['image']
         pred_mask = crop_image(
             colour_code_segmentation(
                 reverse_one_hot(pred_mask), select_class_rgb_values
@@ -394,12 +359,9 @@ def main():
         subfolder = "/".join(path_parts[index + 1 : -1])
 
         save_path = os.path.join(sample_preds_folder, subfolder)
-        # print(f"predicting : {save_path}")
-
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         cv2.imwrite(os.path.join(save_path, f"{names}.png"), pred_mask)
-    # print("Finish prediction!")
 
 
 if __name__ == "__main__":

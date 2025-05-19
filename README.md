@@ -19,23 +19,13 @@
    cd cylinder-penetration
    ```
 
-3. **Create new conda environments**:
-   ```
-   conda env create -f environment.yml
-   ```
-
-4. **Activate conda environment**
-    ```
-    conda activate segmentation-analysis
-    ```
-
 ## Organize the pipeline and your images
 Models can be downloaded from [Box](https://salkinstitute.box.com/s/cqgv1dwm1hkf84eid72hdjqg47nwbpo5).
 
 Please make sure to organize the downloaded pipeline, model, and your own images in the following architecture:
 
 ```
-your root folder/
+cylinder-penetration/
 ├── images/
 │   ├── experimental design (e.g., genetic_diversity)/
 │   │   ├── species (e.g., Arabidopsis)/
@@ -52,9 +42,10 @@ your root folder/
 │   ├── soybean_sorghum_model.pth
 │   ├── label_class_dict_lr.csv
 ├── Dockerfile
-├── requirements.txt
 ├── environment.yml
+├── LICENSE
 ├── README.md
+├── requirements.txt
 ```
 
 ## Running the pipeline with a shell file (RootXplorer_pipeline.sh)
@@ -62,6 +53,10 @@ your root folder/
    In terminal, navigate to your root folder and type:
    ```
    conda env create -f environment.yml
+   ```
+   or
+   ```
+   mamba env create -f environment.yml
    ```
 
 2. **activate the environment**:
@@ -81,7 +76,7 @@ Make sure you have `images`, `model`, and `src` subfolders in your root folder.
    ```
    docker build -t rootxplorer .
    ```
-   
+
 2. **run the docker**:
    ```
    docker run --gpus all rootxplorer

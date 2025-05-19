@@ -10,35 +10,20 @@ import matplotlib.pyplot as plt
 
 def get_layer_boundary(image):
     img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # get 100:300 and -300:-100 # previous was -200:-100
-    region1 = img_gray[:, -200:-100]  # Last 300 to last 100 columns
-    region2 = img_gray[:, 100:200]  # Columns 100 to 300
+    region1 = img_gray[:, -200:-100]  # Last 200 to last 100 columns
+    region2 = img_gray[:, 100:200]  # Columns 100 to 200
 
     # Concatenate them side by side
     img_crop = np.hstack((region1, region2))
 
-    # img_crop = img_gray[:, :]  # manuscript pipeline was [,-200:-100]
-    # remove the left and right 200 pixels
-    # img_crop_r = img_gray[:, -200:-100]
-    # img_crop = np.concatenate((img_crop_l, img_crop_r), axis=1)
-    # img_crop_v = np.mean(img_crop, axis=1)
-
-    # Use np.convolve to calculate the moving average
-    # window_size = 5  # sliding windows for the moving average
-    # moving_averages = np.convolve(
-    #     img_crop_v, np.ones(window_size) / window_size, mode="valid"
-    # )
     gradient_y = cv2.Sobel(img_crop, cv2.CV_64F, 0, 1, ksize=5)
     gradient_avgy = np.mean(gradient_y, axis=1)
 
     top = 0  # the index from cropped location instead of original image
-    # ind = (
-    #     np.argmin(moving_averages[200:-600]) + top + int(window_size / 2) + 200
-    # )  # filter out the first 200 rows and last 100 rows
-    start_filter_ind = 350  # 200 arab # crops is 350
+    start_filter_ind = 350
     ind = (
         np.argmax(gradient_avgy[start_filter_ind:-550]) + top + start_filter_ind
-    )  # filter out the first 200 rows and last 100 rows
+    )  # filter out the first 350 rows and last 550 rows
     return ind
 
 
@@ -49,8 +34,6 @@ def get_layer_boundary_fodler(image_folder, save_path):
         for file in files
         if (file.endswith(".PNG") or file.endswith(".png")) and not file.startswith(".")
     ]
-    # print(f"image_folder: {image_folder}")
-    # print(f"len images: {len(images)}")
 
     ind_df = pd.DataFrame()
     for img in images:
@@ -84,7 +67,6 @@ def get_layer_boundary_fodler(image_folder, save_path):
     ind_df["layer_ind"] = ind_df["layer_ind"].fillna(ind_df["layer_ind"].median())
 
     csv_name = os.path.join(save_path, "layer_index.csv")
-    # print(f"csv_name: {csv_name}")
     ind_df.to_csv(csv_name, index=False)
     return ind_df
 
@@ -140,19 +122,8 @@ def get_count(seg_image, index_median, threshold_area, threshold_count):
 
 
 def get_statistics_frames(df_filtered, save_path):
-    # import csv data
-    # data_path = os.path.join(save_path, "traits_72frames.csv")
-    # data = pd.read_csv(data_path)
     data = df_filtered
-
-    # add ratio of root area and root count
-    # data["root_area_ratio"] = np.divide(data["bottom_area"], data["upper_area"])
-    # data["root_count_ratio"] = np.divide(
-    #     data["bottom_root_count"], data["upper_root_count"]
-    # )
-
     data = data[~data.isin([np.nan, np.inf, -np.inf]).any(axis=1)]
-    # data["scanner_plant"] = data["scanner"] + "_" + data["plant"]
 
     # filter out outliers > 2
     z_score_threshold = 2
@@ -168,10 +139,6 @@ def get_statistics_frames(df_filtered, save_path):
         # Create boolean masks to filter out the outliers for each column
         outlier_mask_count = z_scores_count <= z_score_threshold
         outlier_mask_area = z_scores_area <= z_score_threshold
-
-        # Combine the outlier masks for both columns using the logical AND operation
-        # RCR RAR independently LW
-        # combined_outlier_mask = outlier_mask_count & outlier_mask_area
 
         # filter non-outlier rows of root count ratio
         filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
@@ -353,42 +320,9 @@ def get_statistics_plants(save_path, master_data, plant_group):
     return filtered_df_summary_count, filtered_df_summary_area, filtered_df_summary
 
 
-def viz_data(save_path, plant_group):
-    data_path = os.path.join(save_path, "traits_filteredplants.csv")
-    data = pd.read_csv(data_path)
-
-    # box plot of wave
-    plt.figure(figsize=(10, 6))  # Optional: set the figure size
-    sns.boxplot(x=plant_group, y="root_count_ratio", hue=plant_group, data=data)
-    sns.stripplot(
-        x=plant_group,
-        y="root_count_ratio",
-        data=data,
-        color="black",
-        size=3,
-        jitter=True,
-    )
-    plt.xticks(rotation=45)
-    plt.savefig(os.path.join(save_path, "root_count_ratio.png"), bbox_inches="tight")
-
-    plt.figure(figsize=(10, 6))  # Optional: set the figure size
-    sns.boxplot(x=plant_group, y="root_area_ratio", hue=plant_group, data=data)
-    sns.stripplot(
-        x=plant_group,
-        y="root_area_ratio",
-        data=data,
-        color="black",
-        size=3,
-        jitter=True,
-    )
-    plt.xticks(rotation=45)
-    plt.savefig(os.path.join(save_path, "root_area_ratio.png"), bbox_inches="tight")
-
-
 def get_traits(seg_folder, ind_df, save_path):
     traits_df = ind_df
-    for i in range(len(ind_df)):  #
-        # print(f"Getting traits of {i+1}th image among {len(ind_df)} images")
+    for i in range(len(ind_df)):
         # get layer index and image path
         image_path = os.path.join(seg_folder, ind_df["image_name"][i])
         seg_image = cv2.imread(image_path)
@@ -419,7 +353,6 @@ def remove_frame_outlier_0_upper(data, write_csv, output_dir):
     """Remove frames with 0 upper_root_count."""
     filter = data["upper_root_count"] == 0
     removed = data[filter]
-    # print(f"Removed {len(removed)} frames with 0 root count in upper layer")
     new_data = data[~filter]
     if write_csv:
         csv_path = os.path.join(output_dir, "removed_0upper.csv")
@@ -446,7 +379,6 @@ def remove_frame_outlier_0_bottom(data, threshold, output_dir):
     df_removed = data[
         ~(~((data["plant"].isin(plants_to_remove)) & (data["bottom_root_count"] == 0)))
     ]
-    # print(f"Removed {len(df_removed)} frames with less than 0.5 has 0 bottom counts")
 
     # save the filtered data
     filtered_path = os.path.join(output_dir, "filtered_72frames_0upper_0bottom.csv")
@@ -462,24 +394,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Traits extraction and analysis Pipeline"
     )
-    # parser.add_argument("--image_folder", required=True, help="original image path")
-    # parser.add_argument("--seg_folder", required=True, help="Segmentation path")
-    # parser.add_argument(
-    #     "--save_path", required=True, help="Traits and analysis save path"
-    # )
-    # parser.add_argument(
-    #     "--master_data_csv",
-    #     required=True,
-    #     help="The master data indicating the plant and genotype/accession",
-    # )
     parser.add_argument(
         "--experiment", required=True, help="Experimental design folder path"
     )
-    # parser.add_argument(
-    #     "--plant_group",
-    #     required=True,
-    #     help="The column name of plant outlier removal group",
-    # )
 
     args = parser.parse_args()
 
@@ -491,29 +408,17 @@ def main():
 
     image_path = os.path.join("./images", experiment)
     master_data_csv = [file for file in os.listdir(image_path) if file.endswith(".csv")]
-    # print(f"master_data_csv: {master_data_csv[0]}")
     master_data = pd.read_csv(os.path.join(image_path, master_data_csv[0]))
-    # master_data_csv = args.master_data_csv
     plant_group = "trt"
 
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
     # get the layer index of each cropped image
-    # print("Getting layer boundary index")
     ind_df = get_layer_boundary_fodler(image_folder, save_path)
-    # ind_df = pd.read_csv(os.path.join(save_path, "layer_index.csv"))
-    # print(f"ind_df columns: {ind_df.columns}")
-
-    # boundary_idx_72frames = get_layer_boundary_folder(image_folder, seg_folder)
-    # boundary_idx_72frames.to_csv(
-    #     os.path.join(save_path, "traits_72frames.csv"), index=False
-    # )
 
     # get traits
-    # print("Getting traits")
     traits_df = get_traits(seg_folder, ind_df, save_path)
-    # traits_df = pd.read_csv(os.path.join(save_path, "traits.csv"))
 
     # delete frames with 0 in upper layer
     write_csv = True  # save the filtered data
@@ -527,21 +432,15 @@ def main():
         remove_0, threshold, save_path
     )
 
-    # df_filtered = pd.read_csv(
-    #     os.path.join(save_path, "filtered_72frames_0upper_0bottom.csv")
-    # )
-
     # remove frame outliers based on frames of each plant
     filtered_df_count, filtered_df_area, filtered_df_summary = get_statistics_frames(
         df_filtered, save_path
     )
 
     # remove plant outliers based on concentration or genotype
-    # master_data = pd.read_csv(master_data_csv)
     filtered_df_summary_count, filtered_df_summary_area, filtered_df_summary = (
         get_statistics_plants(save_path, master_data, plant_group)
     )
-    # viz_data(save_path, plant_group)
 
 
 if __name__ == "__main__":

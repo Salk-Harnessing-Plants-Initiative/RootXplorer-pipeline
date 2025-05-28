@@ -1,9 +1,9 @@
-# SALK_projects
+# RootXplorer
 
 ## Purpose and background
-**Purpose**: segmenting cylinder images and extracting traits from segmentation results for Arabidopsis, rice, soybean, and sorghum.
+**Purpose**: Segment cylinder images and extract traits from segmentation masks for Arabidopsis, rice, soybean, and sorghum.
 
-**Background**: to be updated with manuscript. 
+**Background**: We developed RootXplorer, a computer vision-based 3D phenotyping platform for high-throughput quantification of root penetration-related phenotypes across dicot and monocot species non-invasively. RootXplorer integrates a novel phytagel-based cylinder system, a 3D imaging unit, and an automated Python pipeline to extract root penetration-related traits with high precision. 
 
 ## Installation
 

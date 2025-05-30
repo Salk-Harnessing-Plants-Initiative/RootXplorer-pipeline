@@ -66,6 +66,7 @@ cylinder-penetration/
 
 3. **run the shell file**:
    ```
+   sed -i 's/\r$//' src/RootXplorer_pipeline.sh
    sh src/RootXplorer_pipeline.sh
    ```
 

@@ -133,18 +133,30 @@ def get_statistics_frames(df_filtered, save_path):
     for name, group in data_plant:
         # Calculate the z-scores for 'root_count_ratio' and 'root_area_ratio' columns within each wave
         group = group.dropna()  # drop nan values
-        z_scores_count = np.abs(stats.zscore(group["root_count_ratio"]))
-        z_scores_area = np.abs(stats.zscore(group["root_area_ratio"]))
+        # Identify all-zero rows for root_count_ratio and root_area_ratio
+        zero_count_mask = group["root_count_ratio"] == 0
+        zero_area_mask = group["root_area_ratio"] == 0
 
-        # Create boolean masks to filter out the outliers for each column
-        outlier_mask_count = z_scores_count <= z_score_threshold
-        outlier_mask_area = z_scores_area <= z_score_threshold
+        # Calculate z-scores (only if standard deviation is not zero)
+        if group["root_count_ratio"].std() == 0:
+            outlier_mask_count = pd.Series([False] * len(group), index=group.index)
+        else:
+            z_scores_count = np.abs(stats.zscore(group["root_count_ratio"]))
+            outlier_mask_count = z_scores_count <= z_score_threshold
 
-        # filter non-outlier rows of root count ratio
-        filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
-        # filter non-outlier rows of root area ratio
-        filtered_df_area = pd.concat([filtered_df_area, group[outlier_mask_area]])
+        if group["root_area_ratio"].std() == 0:
+            outlier_mask_area = pd.Series([False] * len(group), index=group.index)
+        else:
+            z_scores_area = np.abs(stats.zscore(group["root_area_ratio"]))
+            outlier_mask_area = z_scores_area <= z_score_threshold
 
+        # Combine the masks with the zero masks using logical OR
+        final_mask_count = outlier_mask_count | zero_count_mask
+        final_mask_area = outlier_mask_area | zero_area_mask
+
+        # Append filtered data
+        filtered_df_count = pd.concat([filtered_df_count, group[final_mask_count]])
+        filtered_df_area = pd.concat([filtered_df_area, group[final_mask_area]])
     filtered_df_summary_count = (
         filtered_df_area.groupby("plant")[
             ["root_count_ratio", "upper_root_count", "bottom_root_count"]
@@ -215,20 +227,26 @@ def get_statistics_plants(save_path, master_data, plant_group):
     for name, group in data_plant:
         # Calculate the z-scores for 'root_count_ratio' and 'root_area_ratio' columns within each wave
         group = group.dropna()  # drop nan values
-        z_scores_count = np.abs(stats.zscore(group["root_count_ratio"]))
-        z_scores_area = np.abs(stats.zscore(group["root_area_ratio"]))
+        # Calculate z-scores safely, avoiding errors if standard deviation is zero
+        if group["root_count_ratio"].std() == 0:
+            z_scores_count = pd.Series([0] * len(group), index=group.index)
+        else:
+            z_scores_count = np.abs(stats.zscore(group["root_count_ratio"]))
 
-        # Create boolean masks to filter out the outliers for each column
-        outlier_mask_count = z_scores_count <= z_score_threshold
-        outlier_mask_area = z_scores_area <= z_score_threshold
+        if group["root_area_ratio"].std() == 0:
+            z_scores_area = pd.Series([0] * len(group), index=group.index)
+        else:
+            z_scores_area = np.abs(stats.zscore(group["root_area_ratio"]))
 
-        # filter non-outlier rows of root count ratio
+        # Create masks: keep values within threshold OR values equal to 0
+        outlier_mask_count = (z_scores_count <= z_score_threshold) | (group["root_count_ratio"] == 0)
+        outlier_mask_area = (z_scores_area <= z_score_threshold) | (group["root_area_ratio"] == 0)
+
+        # Filter and append to result DataFrames
         filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
-        # filter non-outlier rows of root area ratio
         filtered_df_area = pd.concat([filtered_df_area, group[outlier_mask_area]])
-
     filtered_df_summary_count = (
-        filtered_df_area.dropna(subset=["root_count_ratio"])
+        filtered_df_count.dropna(subset=["root_count_ratio"])
         .groupby(plant_group)[
             ["root_count_ratio", "upper_root_count", "bottom_root_count"]
         ]
@@ -240,6 +258,7 @@ def get_statistics_plants(save_path, master_data, plant_group):
         )
         .reset_index()
     )
+    print(f"filtered_df_summary_count: {filtered_df_summary_count}")
 
     filtered_df_summary_area = (
         filtered_df_area.groupby(plant_group)[
@@ -253,6 +272,7 @@ def get_statistics_plants(save_path, master_data, plant_group):
         )
         .reset_index()
     )
+    print(f"filtered_df_summary_area: {filtered_df_summary_area}")
 
     # save the filtered data: combine the area and count
     filtered_df = pd.merge(

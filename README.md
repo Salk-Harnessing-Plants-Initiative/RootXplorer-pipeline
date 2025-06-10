@@ -29,7 +29,7 @@ cylinder-penetration/
 ├── images/
 │   ├── experimental design (e.g., genetic_diversity)/
 │   │   ├── species (e.g., Arabidopsis)/
-│   │   │   ├── plant (e.g., ZHOKUWVOIZ)/
+│   │   │   ├── plant name (e.g., ZHOKUWVOIZ)/
 │   │   │   │   ├── frame image (e.g., 1.png)
 │   │   │   ├── plant and experiment mapping (e.g., acc_barcodes_cylinders.csv)
 ├── src/
@@ -67,7 +67,7 @@ cylinder-penetration/
 3. **run the shell file**:
    ```
    sed -i 's/\r$//' src/RootXplorer_pipeline.sh
-   sh src/RootXplorer_pipeline.sh
+   bash src/RootXplorer_pipeline.sh
    ```
 
 ## Running the pipeline with docker

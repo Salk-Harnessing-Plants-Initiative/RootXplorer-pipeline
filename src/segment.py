@@ -296,7 +296,8 @@ def main():
     bbox = {
         "Fast": (350, 56, 1024, 1024),
         "Slow": (520, 56, 1024, 1024),
-        "Main": (590, 56, 1024, 1024),
+        "Main": (540, 56, 1024, 1024),  # MainScanner 2025
+        # "Main": (590, 56, 1024, 1024),# MainScanner 2024
     }
     image_path_crop = os.path.join(save_path, "crop")
     crop_images_folder(bbox, master_data, image_path, image_path_crop)

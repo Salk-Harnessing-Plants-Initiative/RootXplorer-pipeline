@@ -239,8 +239,12 @@ def get_statistics_plants(save_path, master_data, plant_group):
             z_scores_area = np.abs(stats.zscore(group["root_area_ratio"]))
 
         # Create masks: keep values within threshold OR values equal to 0
-        outlier_mask_count = (z_scores_count <= z_score_threshold) | (group["root_count_ratio"] == 0)
-        outlier_mask_area = (z_scores_area <= z_score_threshold) | (group["root_area_ratio"] == 0)
+        outlier_mask_count = (z_scores_count <= z_score_threshold) | (
+            group["root_count_ratio"] == 0
+        )
+        outlier_mask_area = (z_scores_area <= z_score_threshold) | (
+            group["root_area_ratio"] == 0
+        )
 
         # Filter and append to result DataFrames
         filtered_df_count = pd.concat([filtered_df_count, group[outlier_mask_count]])
@@ -427,7 +431,11 @@ def main():
     save_path = os.path.join("./Segmentation", experiment, "analysis")
 
     image_path = os.path.join("./images", experiment)
-    master_data_csv = [file for file in os.listdir(image_path) if file.endswith(".csv")]
+    master_data_csv = [
+        file
+        for file in os.listdir(image_path)
+        if (file.endswith(".csv") and not file.startswith("."))
+    ]
     master_data = pd.read_csv(os.path.join(image_path, master_data_csv[0]))
     plant_group = "trt"
 

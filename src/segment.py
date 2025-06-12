@@ -279,8 +279,11 @@ def main():
     image_path = os.path.join("./images", experiment)
     save_path = os.path.join("./Segmentation", experiment)
 
-    master_data_csv = [file for file in os.listdir(image_path) if file.endswith(".csv")]
-    # print(f"master_data_csv: {master_data_csv[0]}")
+    master_data_csv = [
+        file
+        for file in os.listdir(image_path)
+        if (file.endswith(".csv") and not file.startswith("."))
+    ]
     master_data = pd.read_csv(os.path.join(image_path, master_data_csv[0]))
 
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -296,7 +299,8 @@ def main():
     bbox = {
         "Fast": (350, 56, 1024, 1024),
         "Slow": (520, 56, 1024, 1024),
-        "Main": (590, 56, 1024, 1024),
+        "Main": (540, 56, 1024, 1024),  # MainScanner 2025
+        # "Main": (590, 56, 1024, 1024),# MainScanner 2024
     }
     image_path_crop = os.path.join(save_path, "crop")
     crop_images_folder(bbox, master_data, image_path, image_path_crop)

@@ -158,7 +158,7 @@ def get_statistics_frames(df_filtered, save_path):
         filtered_df_count = pd.concat([filtered_df_count, group[final_mask_count]])
         filtered_df_area = pd.concat([filtered_df_area, group[final_mask_area]])
     filtered_df_summary_count = (
-        filtered_df_area.groupby("plant")[
+        filtered_df_count.groupby("plant")[
             ["root_count_ratio", "upper_root_count", "bottom_root_count"]
         ]
         .agg(

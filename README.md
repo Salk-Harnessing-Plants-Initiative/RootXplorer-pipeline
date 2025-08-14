@@ -10,13 +10,13 @@
 1. **Clone the repository**:  
    Clone the repository to the local drive.
    ```
-   git clone https://github.com/Salk-Harnessing-Plants-Initiative/cylinder-penetration.git
+   git clone https://github.com/Salk-Harnessing-Plants-Initiative/RootXplorer.git
    ```
 
 2. **Navigate to the cloned directory**:  
    
    ```
-   cd cylinder-penetration
+   cd RootXplorer
    ```
 
 ## Organize the pipeline and your images
@@ -25,7 +25,7 @@ Models can be downloaded from [Box](https://salkinstitute.box.com/s/cqgv1dwm1hkf
 Please make sure to organize the downloaded pipeline, model, and your own images in the following architecture:
 
 ```
-cylinder-penetration/
+RootXplorer/
 ├── images/
 │   ├── experimental design (e.g., genetic_diversity)/
 │   │   ├── species (e.g., Arabidopsis)/

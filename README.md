@@ -10,13 +10,13 @@
 1. **Clone the repository**:  
    Clone the repository to the local drive.
    ```
-   git clone https://github.com/Salk-Harnessing-Plants-Initiative/RootXplorer.git
+   git clone https://github.com/Salk-Harnessing-Plants-Initiative/RootXplorer-pipeline.git
    ```
 
 2. **Navigate to the cloned directory**:  
    
    ```
-   cd RootXplorer
+   cd RootXplorer-pipeline
    ```
 
 ## Organize the pipeline and your images
@@ -25,7 +25,7 @@ Models can be downloaded from [Box](https://salkinstitute.box.com/s/cqgv1dwm1hkf
 Please make sure to organize the downloaded pipeline, model, and your own images in the following architecture:
 
 ```
-RootXplorer/
+RootXplorer-pipeline/
 ├── images/
 │   ├── experimental design (e.g., genetic_diversity)/
 │   │   ├── species (e.g., Arabidopsis)/

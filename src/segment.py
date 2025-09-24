@@ -57,7 +57,8 @@ def crop_images_folder(bbox, master_data, image_folder, save_path):
         new_image = image[startY : startY + height, startX : startX + width, :]
 
         # save new_image
-        save_folder = os.path.join(save_path, "/".join(image_name.split("/")[:-1]))
+        # save_folder = os.path.join(save_path, "/".join(image_name.split("/")[:-1]))
+        save_folder = os.path.dirname(os.path.join(save_path, image_name))
         if not os.path.exists(save_folder):
             os.makedirs(save_folder)
         new_name = os.path.join(save_path, image_name)

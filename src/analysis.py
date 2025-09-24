@@ -54,7 +54,7 @@ def get_layer_boundary_fodler(image_folder, save_path):
                 pd.DataFrame(
                     {
                         "image_name": [img],
-                        "plant": [plant],
+                        "plant": [plant.replace('\\', '/')],
                         "frame": [frame],
                         "layer_ind": [ind],
                     }

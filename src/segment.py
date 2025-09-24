@@ -367,7 +367,7 @@ def main():
         save_path = os.path.join(sample_preds_folder, subfolder)
         if not os.path.exists(save_path):
             os.makedirs(save_path)
-        cv2.imwrite(os.path.join(save_path, f"{names}.png"), pred_mask)
+        cv2.imwrite(os.path.join(save_path, f"{os.path.basename(names)}.png"), pred_mask)
 
 
 if __name__ == "__main__":

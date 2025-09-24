@@ -359,6 +359,7 @@ def main():
             true_dimensions,
         )["image"]
         # get the subfolder name
+        path_name = path_name.replace("\\", "/")
         path_parts = path_name.split("/")
         index = path_parts.index("crop")
         subfolder = "/".join(path_parts[index + 1 : -1])

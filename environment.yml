@@ -10,20 +10,18 @@ channels:
   - pytorch3d
 
 dependencies:
-  - python=3.8
+  - python=3.10
   - ipykernel
-  - cudatoolkit=11.3
-  - cudnn=8.2
-  - cupti=11.3
-  - cuda-nvcc
-  - pytorch::pytorch=1.11.0
-  # - pytorch::torchvision
-  # - pytorch::torchaudio
-  # - pytorch3d::pytorch3d=0.7.0
   - ffmpeg
   - nodejs
   - pip
   - pip:
+    # ✅ Install GPU-enabled PyTorch directly from pip (CUDA 12.4 build)
+    - torch==2.4.1+cu124
+    - torchvision==0.19.1+cu124
+    - torchaudio==2.4.1+cu124
+    - --extra-index-url https://download.pytorch.org/whl/cu124
+
     - matplotlib
     - pandas
     - seaborn
@@ -32,7 +30,10 @@ dependencies:
     - scikit-learn
     - albumentations
     - opencv-python-headless
-    # - opencv-python
+    - segmentation_models_pytorch
+    - jupyter
+    - shapely
+    - opencv-python-headless
     - segmentation_models_pytorch
     - jupyter
     - shapely

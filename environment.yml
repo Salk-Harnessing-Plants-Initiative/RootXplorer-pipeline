@@ -30,7 +30,7 @@ dependencies:
     - scikit-learn
     - albumentations
     - opencv-python-headless
-    - segmentation_models_pytorch
+    - segmentation_models_pytorch==0.3.0
     - jupyter
     - shapely
     - opencv-python-headless

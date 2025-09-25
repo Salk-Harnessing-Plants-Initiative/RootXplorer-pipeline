@@ -80,5 +80,6 @@ Make sure you have `images`, `model`, and `src` subfolders in your root folder.
 
 2. **run the docker**:
    ```
-   docker run --gpus all rootxplorer
+   docker run --gpus all -it -v /Segmentation:/workspace/Segmentation rootxplorer:latest
+
    ```

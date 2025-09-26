@@ -33,8 +33,8 @@ RootXplorer-pipeline/
 │   │   │   │   ├── frame image (e.g., 1.png)
 │   │   │   ├── plant and experiment mapping (e.g., acc_barcodes_cylinders.csv)
 ├── src/
-│   ├── pipeline_analysis_v2.py
-│   ├── pipeline_crop_segment_v2.py
+│   ├── analysis.py
+│   ├── segment.py
 │   ├── RootXplorer_pipeline.sh
 ├── model/
 │   ├── arabidopsis_model.pth
